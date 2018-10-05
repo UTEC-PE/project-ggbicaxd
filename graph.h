@@ -3,6 +3,10 @@
 
 #include <vector>
 #include <list>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <sstream>
 
 #include "node.h"
 #include "edge.h"
@@ -11,7 +15,7 @@ using namespace std;
 
 class Traits {
 	public:
-		typedef char N;
+		typedef int N;
 		typedef int E;
 };
 
@@ -28,6 +32,40 @@ class Graph {
         typedef typename NodeSeq::iterator NodeIte;
         typedef typename EdgeSeq::iterator EdgeIte;
 
+        void read_file(string file)
+        {
+            ifstream read(file);
+            string lines;
+            double x; 
+            double y;
+
+            getline(read,lines);
+            int new_node = stoi (lines);
+            cout << new_node << "\n";
+            for(int i = 0; i<new_node; i++)
+            {
+                //insert_nodo
+                getline(read, lines);
+                stringstream ss(lines);
+                ss >> x >> y;
+                node* nodo = new node(i,x,y);
+                cout << x << " " << y << "\n";
+            }
+            
+            getline(read, lines);
+            int vertex0, vertexf;
+            E height;
+            bool dir;
+
+            while(getline(read,lines))
+            {
+                stringstream ss(lines);
+                ss >> vertex0 >> vertexf >> height >> dir;
+                cout << vertex0 << " " << vertexf << " " << height << " " << dir <<"\n"; 
+            }
+             
+            read.close();
+        }
     private:
         NodeSeq nodes;
         NodeIte ni;

@@ -10,11 +10,19 @@ class Node {
         typedef typename G::EdgeSeq EdgeSeq;
 
         EdgeSeq edges;
+        Node(N data, double x, double y)
+        {
+            this->data = data;
+            this->x = x;
+            this->y = y;
+        }
+        
 
     private:
         N data;
         double x;
         double y;
+
 };
 
 #endif

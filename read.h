@@ -2,6 +2,11 @@
 #define READ_H
 
 #include "graph.h"
+#include <fstream>
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 /**
  * Clase de ayuda para leer el grafo desde un archivo,
@@ -15,7 +20,7 @@ class Read {
 		
 	public:
 		Read(char* file) {
-            // TODO
+
         }
 		
 		graph& getGraph() {

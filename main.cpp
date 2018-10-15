@@ -6,9 +6,10 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    Graph<Traits> mygraph;
-    mygraph.read_file("graph1.txt");
-    system("PAUSE");
+    Graph<Traits> mygraph(0);
+    mygraph.read_file("graph2.txt");
+    mygraph.print();
+    //system("PAUSE");
 
 
     return EXIT_SUCCESS;

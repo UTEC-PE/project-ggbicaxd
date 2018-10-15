@@ -16,7 +16,9 @@ class Node {
             this->x = x;
             this->y = y;
         }
-        
+        N getdata(){
+          return data;
+        }
 
     private:
         N data;

@@ -6,9 +6,14 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    Graph<Traits> mygraph(0);
+    Graph<Traits> mygraph(1);
     mygraph.read_file("graph2.txt");
     mygraph.print();
+    auto temp=mygraph.buscarnodo(0);
+    mygraph.bfs(temp);
+    /*cout<<mygraph.aristas<<endl;
+    cout<<mygraph.nodos<<endl;
+    cout<<mygraph.getDensity()<<endl;
     cout<<"grado del nodo 2: "<<mygraph.getGradoNodo(2)<<endl;
     cout<<"grado de salida del nodo 2: "<<mygraph.getGradoNodoS(2)<<endl;
     cout<<"grado de llegada del nodo 2: "<<mygraph.getGradoNodoLL(2)<<endl;
@@ -25,7 +30,7 @@ int main(int argc, char *argv[]) {
     cout<<"grado de salida del nodo 2: "<<mygraph.getGradoNodoS(2)<<endl;
     cout<<"grado de llegada del nodo 2: "<<mygraph.getGradoNodoLL(2)<<endl;
     cout<<"nodos "<<mygraph.nodos<<endl;
-    cout<<"aristas "<<mygraph.aristas<<endl;
+    cout<<"aristas "<<mygraph.aristas<<endl;*/
     //system("PAUSE");
 
 

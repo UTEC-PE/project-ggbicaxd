@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <map>
+#include "queue.h"
 
 #include "node.h"
 #include "edge.h"
@@ -55,6 +57,48 @@ class Graph {
 						delete nodes[i];
 					}
 				}
+
+				void bfs(node* nodo){
+					map<node*, bool> map;
+					Queue<edge*> que;
+					for(int i=0; i<nodes.size();i++){
+						map.insert(pair<node*, bool> (nodes[i],false));
+					}
+					/*for(auto& item:map){
+						cout <<item.first->getdata()<<" ";
+						cout<<item.second<<endl;
+					}*/
+					for(auto& item:nodo->edges){
+						edge* arista =item;
+						que.push(arista);
+					}
+					map[nodo]=true;
+					cout<<nodo->getdata()<<" ";
+					while(!que.empty()){
+						edge* arista=que.get();
+						if(arista->nodes[0]!=nodo && map[arista->nodes[0]]==false){
+							nodo=arista->nodes[0];
+							map[nodo]=true;
+							cout<<nodo->getdata()<<" ";
+							for(auto& item:nodo->edges){
+								edge* arist =item;
+								que.push(arist);
+							}
+						}
+						else if(arista->nodes[1]!=nodo && map[arista->nodes[1]]==false){
+							nodo=arista->nodes[1];
+							map[nodo]=true;
+							cout<< nodo->getdata()<<" ";
+							for(auto& item:nodo->edges){
+								edge* arist =item;
+								que.push(arist);
+							}
+						}
+						que.pop();
+					}
+					cout<<endl;
+				}
+
 				void insertarnodo(int nombre,float x, float y){
 				 node* temp=buscarnodo(nombre);
 				 if(!temp){
@@ -246,9 +290,9 @@ class Graph {
         {
           float densidad;
           if(dir==0)
-            densidad = (2*arista)/((nodos)*(nodos-1));
+            densidad = (2*(float)aristas)/(((float)nodos)*((float)nodos-1));
           else
-            densidad = arista/((nodos)-(nodos-1));
+            densidad = (float)aristas/(((float)nodos)-((float)nodos-1));
           return densidad;
         }
 

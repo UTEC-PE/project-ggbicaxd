@@ -242,6 +242,16 @@ class Graph {
 					return ptrarista;
 				}
 
+                float getDensity()
+                {
+                    float densidad;
+                    if(dir==0)
+                        densidad = (2*arista)/((nodos)*(nodos-1));
+                    else
+                        densidad = arista/((nodos)-(nodos-1));
+                    return densidad;
+                }
+
 			  void read_file(string file)
 			  {
 					ifstream read(file);

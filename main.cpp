@@ -14,8 +14,9 @@ int main(int argc, char *argv[]) {
     cout<<"grado de llegada del nodo 2: "<<mygraph.getGradoNodoLL(2)<<endl;
     cout<<"nodos "<<mygraph.nodos<<endl;
     cout<<"aristas "<<mygraph.aristas<<endl;
+    cout <<"densidad: "<<mygraph.getDensity()<<endl;
     cout<<endl;
-    mygraph.removerNodo(4);
+    /*mygraph.removerNodo(4);
     //mygraph.removerNodo(1);
     mygraph.removerArista(2,0);
     mygraph.removerArista(0,3);
@@ -26,7 +27,10 @@ int main(int argc, char *argv[]) {
     cout<<"grado de llegada del nodo 2: "<<mygraph.getGradoNodoLL(2)<<endl;
     cout<<"nodos "<<mygraph.nodos<<endl;
     cout<<"aristas "<<mygraph.aristas<<endl;
-    //system("PAUSE");
+    cout <<"densidad: "<<mygraph.getDensity()<<endl;
+    //system("PAUSE");*/
+    auto temp=mygraph.buscarnodo(0);
+    mygraph.kruskal(temp);
 
 
     return EXIT_SUCCESS;

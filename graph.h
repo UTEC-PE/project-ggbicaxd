@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <map>
 
 #include "node.h"
 #include "edge.h"
@@ -31,7 +32,7 @@ class Graph {
         typedef typename Tr::E E;
         typedef typename NodeSeq::iterator NodeIte;
         typedef typename EdgeSeq::iterator EdgeIte;
-
+        
     private:
         NodeSeq nodes;
         NodeIte ni;
@@ -244,19 +245,83 @@ class Graph {
 
                 float getDensity()
                 {
+                    float cotadensidad = 0.6;
                     float densidad;
-                    if(dir==0)
-                        densidad = (2*arista)/((nodos)*(nodos-1));
-                    else
-                        densidad = arista/((nodos)-(nodos-1));
+                    if(dir==0){
+                        densidad = (2*(float)aristas)/(((float)nodos)*((float)nodos-1));
+                        if(densidad > cotadensidad)
+                            cout << "El grafo no dirigido es denso: ";
+                        else
+                            cout << "El grafo no dirigido es disperso: ";
+                    }
+                    else{
+                        densidad = (float)aristas/(((float)nodos)-((float)nodos-1));
+                        if(densidad > cotadensidad)
+                            cout << "El grafo dirigido es denso: ";
+                        else
+                            cout << "El grafo dirigido es disperso: ";
+                    }
                     return densidad;
+                }
+                void kruskal(node* nodo)
+                {
+                    cout << "Kruskal: " << endl;
+                    if(dir==1){
+                        cout << "Es grafo dirigido, no puede implementarse kruskal."<< endl;
+                        return;
+                    }
+                    
+                    multimap<E, edge*> aristamap;
+                    map<node*, bool> nodosmap;
+
+                    for (int i = 0; i < nodes.size(); i++)
+                    {
+                        nodosmap.insert(pair<node*, bool>(nodes[i],false));
+                        for (auto item: nodes[i]->edges)
+                        {
+                            aristamap.insert(pair<E, edge*>(item->getdata(), item));
+                        }
+                    }
+                    
+                    nodosmap[nodo] = true;
+                    cout << nodo->getdata() << " ";
+
+                    auto ite = aristamap.begin();
+                    while(ite != aristamap.end()){
+                        if(ite->second->nodes[0] != nodo && nodosmap[ite->second->nodes[0]] == false){
+                            nodo = ite->second->nodes[0];
+                            nodosmap[nodo] = true;
+                            cout << nodo->getdata() << " ";
+                            aristamap.erase(ite);
+                            for(auto& item:nodo->edges){
+                                aristamap.insert(pair<E, edge*>(item->getdata(), item));
+                            }
+                            ite = aristamap.begin();
+                        }
+                        else if(ite->second->nodes[1] != nodo && nodosmap[ite->second->nodes[1]] == false){
+                            nodo = ite->second->nodes[1];
+                            nodosmap[nodo] = true;
+                            cout << nodo->getdata() << " ";
+                            aristamap.erase(ite);
+                            for(auto& item:nodo->edges){
+                                aristamap.insert(pair<E, edge*>(item->getdata(), item));
+                            }
+                            ite = aristamap.begin();
+                        }
+                        else
+                        {
+                            aristamap.erase(ite);
+                            ite = aristamap.begin();
+                        }
+                    }
+                    cout<<endl;
                 }
 
 			  void read_file(string file)
 			  {
-					ifstream read(file);
-          string lines;
-	        float x;
+				ifstream read(file);
+                string lines;
+	            float x;
 			    float y;
 
 			    getline(read,lines);
@@ -264,7 +329,7 @@ class Graph {
 			    for(int i = 0; i<new_node; i++)
 			    {
 						//insert_nodo
-	          getline(read, lines);
+	            getline(read, lines);
 			      stringstream ss(lines);
 			      ss >> x >> y;
 						insertarnodo(i,x,y);
@@ -277,8 +342,8 @@ class Graph {
 			     while(getline(read,lines))
 			     {
 			      stringstream ss(lines);
-            ss >> vertex0 >> vertexf >> weight;
-						InsertArista(vertex0,vertexf,weight);
+                    ss >> vertex0 >> vertexf >> weight;
+					InsertArista(vertex0,vertexf,weight);
 			     }
 
 			     read.close();

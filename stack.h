@@ -62,11 +62,16 @@ public:
     };
     void print(){
         Nodeestruc<T>* actual=head;
-        while(actual!=tail){
-            cout<<actual->data<<" ";
-            actual=actual->next;
+        if(!head){
+          cout<<"stack vacio"<<endl;
         }
-        cout<<tail->data<<endl;
+        else{
+          while(actual!=tail){
+              cout<<actual->data->getdata()<<" ";
+              actual=actual->next;
+          }
+          cout<<tail->data->getdata()<<endl;
+        }    
     };
     bool empty(){
         return head == nullptr;

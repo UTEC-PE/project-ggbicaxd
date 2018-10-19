@@ -8,7 +8,9 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <algorithm>
 #include "queue.h"
+#include "stack.h"
 
 #include "node.h"
 #include "edge.h"
@@ -39,6 +41,8 @@ class Graph {
         NodeIte ni;
         EdgeIte ei;
 				bool dir;
+				bool conexo;
+				bool bipartito;
 
 
 		public:
@@ -47,6 +51,8 @@ class Graph {
 				Graph(bool dir):dir(dir){
 					nodos=0;
 					aristas=0;
+					conexo=false;
+					bipartito=true;
 				};
 
 				~Graph(){
@@ -58,16 +64,120 @@ class Graph {
 					}
 				}
 
+				void fuertemente(node* nodo){
+					/*map<node*, bool> map;      //Hallar el orden de cierre
+					Stack<node*> sta;
+					for(int i=0; i<nodes.size();i++){
+						map.insert(pair<node*, bool> (nodes[i],false));
+					}
+					NodeSeq nuevos;
+					map[nodo]=true;
+					auto temp=nodo;
+					sta.push(nodo);
+					while(!sta.empty()){
+						nodo=sta.get();
+						//nodo=temp;
+						for(auto& item:nodo->edges){
+							if(map[item->nodes[1]]==false){
+								nodo=item->nodes[1];
+								sta.push(nodo);
+								break;
+							}
+						}
+						if(nodo==temp){
+							nuevos.push_back(nodo);
+							sta.pop();
+						}
+						else{
+							map[nodo]=true;
+						}
+						temp=nodo;
+					}
+					for(int i=0; i<nuevos.size();i++){
+						cout<<nuevos[i]->getdata()<<" ";
+					}
+					cout<<endl;*/
+					float xy=1.0;
+					Graph<Tr> traspuesto(1);
+					for(int i=0;i<nodes.size();i++){
+						traspuesto.insertarnodo(nodes[i]->getdata(),xy,xy);
+					}
+					node* temp=nullptr;
+					for(int i=0; i<nodes.size();i++){
+						for(auto& item:nodes[i]->edges){
+							traspuesto.InsertArista(item->nodes[1]->getdata(),item->nodes[0]->getdata(), item->getdata());
+						}
+					}
+					//traspuesto.print();
+
+					dfs(nodo);
+					nodo=traspuesto.buscarnodo(nodo->getdata());
+					traspuesto.dfs(nodo);
+					if(conexo && traspuesto.isconexo()){
+						conexo=true;
+						cout<<"fuertemente conexo"<<endl;
+					}
+					else{
+						conexo=false;
+						cout<<"no es fuertemente conexo"<<endl;
+					}
+				}
+
+				void dfs(node* nodo){
+					cout<<"DFS"<<endl;
+					map<node*, bool> map;
+					Stack<edge*> sta;
+					int xnodos=1;
+					for(int i=0; i<nodes.size();i++){
+						map.insert(pair<node*, bool> (nodes[i],false));
+					}
+					for(auto& item:nodo->edges){
+						edge* arista =item;
+						sta.push(arista);
+					}
+					map[nodo]=true;
+					cout<<nodo->getdata()<<" ";
+					while(!sta.empty()){
+						edge* arista=sta.get();
+						if(arista->nodes[0]!=nodo && map[arista->nodes[0]]==false){
+							nodo=arista->nodes[0];
+							map[nodo]=true;
+							cout<<nodo->getdata()<<" ";
+							xnodos++;
+							for(auto& item:nodo->edges){
+								edge* arist =item;
+								sta.push(arist);
+							}
+						}
+						else if(arista->nodes[1]!=nodo && map[arista->nodes[1]]==false){
+							nodo=arista->nodes[1];
+							map[nodo]=true;
+							cout<< nodo->getdata()<<" ";
+							xnodos++;
+							for(auto& item:nodo->edges){
+								edge* arist =item;
+								sta.push(arist);
+							}
+						}
+						else{
+							sta.pop();
+						}
+					}
+					if(xnodos==nodos){
+						conexo=true;
+					}
+					cout<<endl;
+
+				}
+
 				void bfs(node* nodo){
+					cout<<"BFS"<<endl;
+					int xnodos=1;
 					map<node*, bool> map;
 					Queue<edge*> que;
 					for(int i=0; i<nodes.size();i++){
 						map.insert(pair<node*, bool> (nodes[i],false));
 					}
-					/*for(auto& item:map){
-						cout <<item.first->getdata()<<" ";
-						cout<<item.second<<endl;
-					}*/
 					for(auto& item:nodo->edges){
 						edge* arista =item;
 						que.push(arista);
@@ -80,6 +190,7 @@ class Graph {
 							nodo=arista->nodes[0];
 							map[nodo]=true;
 							cout<<nodo->getdata()<<" ";
+							xnodos++;
 							for(auto& item:nodo->edges){
 								edge* arist =item;
 								que.push(arist);
@@ -89,12 +200,129 @@ class Graph {
 							nodo=arista->nodes[1];
 							map[nodo]=true;
 							cout<< nodo->getdata()<<" ";
+							xnodos++;
+
 							for(auto& item:nodo->edges){
 								edge* arist =item;
 								que.push(arist);
 							}
 						}
 						que.pop();
+					}
+					if(xnodos==nodos){
+						conexo=true;
+					}
+					else{
+						conexo=false;
+					}
+					cout<<endl;
+				}
+
+				bool isbipartito(){//0 sin color, 1 negro, 2 rojo
+					auto nodo=buscarnodo(0);
+					cout<<endl;
+					map<node* , int> colores;
+					map<node*, bool> map;
+					bool turno=false;
+					Queue<edge*> que;
+					for(int i=0; i<nodes.size();i++){
+						map.insert(pair<node*, bool> (nodes[i],false));
+						colores.insert(pair<node*, int> (nodes[i],0));
+					}
+					for(auto& item:nodo->edges){
+						edge* arista =item;
+						que.push(arista);
+					}
+					map[nodo]=true;
+					colores[nodo]=1;
+					while(!que.empty()){
+						edge* arista=que.get();
+						if(arista->nodes[0]!=nodo && map[arista->nodes[0]]==false){
+							nodo=arista->nodes[0];
+							map[nodo]=true;
+							if(!turno){
+								colores[nodo]=2;
+							}
+							else if(turno){
+								colores[nodo]=1;
+							}
+							for(auto& item:nodo->edges){
+								edge* arist =item;
+								que.push(arist);
+							}
+						}
+						else if(arista->nodes[1]!=nodo && map[arista->nodes[1]]==false){
+							nodo=arista->nodes[1];
+							map[nodo]=true;
+							if(!turno){
+								colores[nodo]=2;
+							}
+							else if(turno){
+								colores[nodo]=1;
+							}
+							for(auto& item:nodo->edges){
+								edge* arist =item;
+								que.push(arist);
+							}
+						}
+						if(colores[arista->nodes[1]]== colores[arista->nodes[0]] ){
+							bipartito=false;
+							break;
+						}
+						turno=!turno;
+						que.pop();
+					}
+					if(bipartito){
+						cout<<"es bipartito"<<endl;
+					}
+					else{
+						cout<<"no es bipartito"<<endl;
+					}
+					return bipartito;
+				}
+
+				void prim(node* nodo){
+					cout<<"Prim"<<endl;
+					if(dir==1){
+						cout<<"grafo dirigido, no hay prim"<<endl;
+						return;
+					}
+					multimap<E, edge*> aristmap;
+					map<node*,bool> map;
+					for(int i=0; i<nodes.size();i++){
+						map.insert(pair<node*, bool> (nodes[i],false));
+					}
+					for(auto item: nodo->edges){
+						aristmap.insert(pair<E,edge*> (item->getdata(), item));
+					}
+					map[nodo]=true;
+					//cout<<nodo->getdata()<<" ";
+					auto ite=aristmap.begin();
+					while(ite!=aristmap.end()){
+						if(ite->second->nodes[0]!=nodo && map[ite->second->nodes[0]]==false){
+							cout<<"{"<<ite->second->nodes[1]->getdata()<<","<<ite->second->nodes[0]->getdata()<<","<<ite->first <<"}"<<" ";
+							nodo=ite->second->nodes[0];
+							map[nodo]=true;
+							aristmap.erase(ite);
+							for(auto& item:nodo->edges){
+								aristmap.insert(pair<E,edge*> (item->getdata(), item));
+							}
+							ite=aristmap.begin();
+						}
+						else if(ite->second->nodes[1]!=nodo && map[ite->second->nodes[1]]==false){
+							cout<<"{"<<ite->second->nodes[0]->getdata()<<","<<ite->second->nodes[1]->getdata()<<","<<ite->first <<"}"<<" ";
+							nodo=ite->second->nodes[1];
+							map[nodo]=true;
+							aristmap.erase(ite);
+							for(auto& item:nodo->edges){
+								aristmap.insert(pair<E,edge*> (item->getdata(), item));
+							}
+							ite=aristmap.begin();
+						}
+						else{
+							aristmap.erase(ite);
+							ite=aristmap.begin();
+						}
 					}
 					cout<<endl;
 				}
@@ -121,6 +349,7 @@ class Graph {
 						for ( auto& item : temp->edges )
 						{
 							if(item->nodes[0]->getdata()==nodo2 || item->nodes[1]->getdata()==nodo2){
+								cout<<"arista existente"<<endl;
 								throw "arista ya existente";
 							}
 						}
@@ -137,6 +366,7 @@ class Graph {
 						for ( auto& item : temp->edges )
 						{
 							if(item->nodes[1]->getdata()==nodo2){
+								cout<<"arista ya existente"<<endl;
 								throw "arista ya existente";
 							}
 						}
@@ -243,6 +473,20 @@ class Graph {
 						throw "no existe el nodo";
 					else
 						return temp->gradollegada();
+				}
+				void comprobar_conectividad(node* nodo){
+					if(dir==0){
+						dfs(nodo);
+						if(conexo)
+							cout<<"conexo"<<endl;
+						else
+							cout<<"no conexo"<<endl;
+					}else{
+						fuertemente(nodo);
+					}
+				}
+				bool isconexo(){
+					return conexo;
 				}
 
 				void print() {

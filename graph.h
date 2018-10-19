@@ -281,6 +281,60 @@ class Graph {
 					return bipartito;
 				}
 
+				void kruskal(node* nodo)
+        {
+          cout << "Kruskal: " << endl;
+          if(dir==1){
+            cout << "Es grafo dirigido, no puede implementarse kruskal."<< endl;
+            return;
+          }
+
+          multimap<E, edge*> aristamap;
+          map<node*, bool> nodosmap;
+
+          for (int i = 0; i < nodes.size(); i++)
+          {
+            nodosmap.insert(pair<node*, bool>(nodes[i],false));
+            for (auto item: nodes[i]->edges)
+            {
+              aristamap.insert(pair<E, edge*>(item->getdata(), item));
+            }
+          }
+
+          nodosmap[nodo] = true;
+          cout << nodo->getdata() << " ";
+
+          auto ite = aristamap.begin();
+          while(ite != aristamap.end()){
+          	if(ite->second->nodes[0] != nodo && nodosmap[ite->second->nodes[0]] == false){
+            	nodo = ite->second->nodes[0];
+            	nodosmap[nodo] = true;
+            	cout << nodo->getdata() << " ";
+            	aristamap.erase(ite);
+          	for(auto& item:nodo->edges){
+            	aristamap.insert(pair<E, edge*>(item->getdata(), item));
+          	}
+          	ite = aristamap.begin();
+          	}
+            else if(ite->second->nodes[1] != nodo && nodosmap[ite->second->nodes[1]] == false){
+            	nodo = ite->second->nodes[1];
+            	nodosmap[nodo] = true;
+            	cout << nodo->getdata() << " ";
+            	aristamap.erase(ite);
+            	for(auto& item:nodo->edges){
+            		aristamap.insert(pair<E, edge*>(item->getdata(), item));
+            	}
+              ite = aristamap.begin();
+          	}
+            else
+            {
+              aristamap.erase(ite);
+              ite = aristamap.begin();
+            }
+          }
+          cout<<endl;
+        }
+
 				void prim(node* nodo){
 					cout<<"Prim"<<endl;
 					if(dir==1){
@@ -530,15 +584,26 @@ class Graph {
 					return ptrarista;
 				}
 
-        float getDensity()
+				float getDensity()
         {
+          float cotadensidad = 0.6;
           float densidad;
-          if(dir==0)
+          if(dir==0){
             densidad = (2*(float)aristas)/(((float)nodos)*((float)nodos-1));
-          else
+            if(densidad > cotadensidad)
+              cout << "El grafo no dirigido es denso: ";
+            else
+              cout << "El grafo no dirigido es disperso: ";
+          }
+          else{
             densidad = (float)aristas/(((float)nodos)-((float)nodos-1));
-          return densidad;
-        }
+            if(densidad > cotadensidad)
+              cout << "El grafo dirigido es denso: ";
+            else
+              cout << "El grafo dirigido es disperso: ";
+            }
+           return densidad;
+          }
 
 			  void read_file(string file)
 			  {

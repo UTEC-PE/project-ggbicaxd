@@ -542,9 +542,9 @@ class Graph {
 
 			  void read_file(string file)
 			  {
-					ifstream read(file);
-          string lines;
-	        float x;
+				ifstream read(file);
+                string lines;
+	            float x;
 			    float y;
 
 			    getline(read,lines);
@@ -552,7 +552,7 @@ class Graph {
 			    for(int i = 0; i<new_node; i++)
 			    {
 						//insert_nodo
-	          getline(read, lines);
+	            getline(read, lines);
 			      stringstream ss(lines);
 			      ss >> x >> y;
 						insertarnodo(i,x,y);
@@ -565,8 +565,8 @@ class Graph {
 			     while(getline(read,lines))
 			     {
 			      stringstream ss(lines);
-            ss >> vertex0 >> vertexf >> weight;
-						InsertArista(vertex0,vertexf,weight);
+                    ss >> vertex0 >> vertexf >> weight;
+					InsertArista(vertex0,vertexf,weight);
 			     }
 
 			     read.close();

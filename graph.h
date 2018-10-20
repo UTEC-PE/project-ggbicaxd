@@ -64,39 +64,7 @@ class Graph {
 					}
 				}
 
-				void fuertemente(node* nodo){
-					/*map<node*, bool> map;      //Hallar el orden de cierre
-					Stack<node*> sta;
-					for(int i=0; i<nodes.size();i++){
-						map.insert(pair<node*, bool> (nodes[i],false));
-					}
-					NodeSeq nuevos;
-					map[nodo]=true;
-					auto temp=nodo;
-					sta.push(nodo);
-					while(!sta.empty()){
-						nodo=sta.get();
-						//nodo=temp;
-						for(auto& item:nodo->edges){
-							if(map[item->nodes[1]]==false){
-								nodo=item->nodes[1];
-								sta.push(nodo);
-								break;
-							}
-						}
-						if(nodo==temp){
-							nuevos.push_back(nodo);
-							sta.pop();
-						}
-						else{
-							map[nodo]=true;
-						}
-						temp=nodo;
-					}
-					for(int i=0; i<nuevos.size();i++){
-						cout<<nuevos[i]->getdata()<<" ";
-					}
-					cout<<endl;*/
+				void fuertemente(node* nodo){//Comprueba la conectividad, se llama desde comprobar_conectividad
 					float xy=1.0;
 					Graph<Tr> traspuesto(1);
 					for(int i=0;i<nodes.size();i++){
@@ -108,7 +76,6 @@ class Graph {
 							traspuesto.InsertArista(item->nodes[1]->getdata(),item->nodes[0]->getdata(), item->getdata());
 						}
 					}
-					//traspuesto.print();
 
 					dfs(nodo);
 					nodo=traspuesto.buscarnodo(nodo->getdata());
@@ -123,7 +90,8 @@ class Graph {
 					}
 				}
 
-				void dfs(node* nodo){
+				EdgeSeq dfs(node* nodo){//Busqueda en profundidad, comprueba conectividad en caso dirigido cuando es llamado por comprobar_conectividad
+					EdgeSeq respuesta;
 					cout<<"DFS"<<endl;
 					map<node*, bool> map;
 					Stack<edge*> sta;
@@ -142,6 +110,7 @@ class Graph {
 						if(arista->nodes[0]!=nodo && map[arista->nodes[0]]==false){
 							nodo=arista->nodes[0];
 							map[nodo]=true;
+							respuesta.push_back(arista);
 							cout<<nodo->getdata()<<" ";
 							xnodos++;
 							for(auto& item:nodo->edges){
@@ -152,6 +121,7 @@ class Graph {
 						else if(arista->nodes[1]!=nodo && map[arista->nodes[1]]==false){
 							nodo=arista->nodes[1];
 							map[nodo]=true;
+							respuesta.push_back(arista);
 							cout<< nodo->getdata()<<" ";
 							xnodos++;
 							for(auto& item:nodo->edges){
@@ -167,10 +137,11 @@ class Graph {
 						conexo=true;
 					}
 					cout<<endl;
-
+					return respuesta;
 				}
 
-				void bfs(node* nodo){
+				EdgeSeq bfs(node* nodo){//Busqueda en amplitud, ademas comprueba conectividad
+					EdgeSeq respuesta;
 					cout<<"BFS"<<endl;
 					int xnodos=1;
 					map<node*, bool> map;
@@ -189,6 +160,7 @@ class Graph {
 						if(arista->nodes[0]!=nodo && map[arista->nodes[0]]==false){
 							nodo=arista->nodes[0];
 							map[nodo]=true;
+							respuesta.push_back(arista);
 							cout<<nodo->getdata()<<" ";
 							xnodos++;
 							for(auto& item:nodo->edges){
@@ -199,9 +171,9 @@ class Graph {
 						else if(arista->nodes[1]!=nodo && map[arista->nodes[1]]==false){
 							nodo=arista->nodes[1];
 							map[nodo]=true;
+							respuesta.push_back(arista);
 							cout<< nodo->getdata()<<" ";
 							xnodos++;
-
 							for(auto& item:nodo->edges){
 								edge* arist =item;
 								que.push(arist);
@@ -216,9 +188,10 @@ class Graph {
 						conexo=false;
 					}
 					cout<<endl;
+					return respuesta;
 				}
 
-				bool isbipartito(){//0 sin color, 1 negro, 2 rojo
+				bool isbipartito(){//0 sin color, 1 negro, 2 rojo, turno = en false es turno de negros se pintan los nodos de rojo, en true turno de rojos se pintan los nodos de negros
 					auto nodo=buscarnodo(0);
 					cout<<endl;
 					map<node* , int> colores;
@@ -281,65 +254,68 @@ class Graph {
 					return bipartito;
 				}
 
-				void kruskal(node* nodo)
+				EdgeSeq kruskal()// Kruskal con disjoint sets
         {
+					EdgeSeq respuesta;
           cout << "Kruskal: " << endl;
           if(dir==1){
             cout << "Es grafo dirigido, no puede implementarse kruskal."<< endl;
-            return;
+            return respuesta;
           }
 
           multimap<E, edge*> aristamap;
-          map<node*, bool> nodosmap;
-
           for (int i = 0; i < nodes.size(); i++)
           {
-            nodosmap.insert(pair<node*, bool>(nodes[i],false));
             for (auto item: nodes[i]->edges)
             {
               aristamap.insert(pair<E, edge*>(item->getdata(), item));
             }
           }
-
-          nodosmap[nodo] = true;
-          cout << nodo->getdata() << " ";
-
           auto ite = aristamap.begin();
+					ite->second->nodes[0]->setpadre(ite->second->nodes[0]);
           while(ite != aristamap.end()){
-          	if(ite->second->nodes[0] != nodo && nodosmap[ite->second->nodes[0]] == false){
-            	nodo = ite->second->nodes[0];
-            	nodosmap[nodo] = true;
-            	cout << nodo->getdata() << " ";
-            	aristamap.erase(ite);
-          	for(auto& item:nodo->edges){
-            	aristamap.insert(pair<E, edge*>(item->getdata(), item));
-          	}
-          	ite = aristamap.begin();
-          	}
-            else if(ite->second->nodes[1] != nodo && nodosmap[ite->second->nodes[1]] == false){
-            	nodo = ite->second->nodes[1];
-            	nodosmap[nodo] = true;
-            	cout << nodo->getdata() << " ";
-            	aristamap.erase(ite);
-            	for(auto& item:nodo->edges){
-            		aristamap.insert(pair<E, edge*>(item->getdata(), item));
-            	}
-              ite = aristamap.begin();
-          	}
-            else
-            {
-              aristamap.erase(ite);
-              ite = aristamap.begin();
-            }
+						if(!ite->second->nodes[0]->buscarpadre() && !ite->second->nodes[1]->buscarpadre()){
+							ite->second->nodes[0]->setpadre(ite->second->nodes[0]);
+							ite->second->nodes[1]->setpadre(ite->second->nodes[0]);
+							respuesta.push_back(ite->second);
+							cout<<"{"<<ite->second->nodes[0]->getdata()<<","<<ite->second->nodes[1]->getdata()<<","<<ite->first <<"}"<<" ";
+							aristamap.erase(ite);
+          		ite = aristamap.begin();
+						}
+						else if(ite->second->nodes[0]->buscarpadre()==ite->second->nodes[1]->buscarpadre()){
+							aristamap.erase(ite);
+							ite = aristamap.begin();
+						}
+						else if(ite->second->nodes[0]->buscarpadre()!=ite->second->nodes[1]->buscarpadre()){
+							if(ite->second->nodes[0]->buscarpadre() && ite->second->nodes[1]->buscarpadre()){
+								ite->second->nodes[1]->setpadre(ite->second->nodes[0]->buscarpadre());
+								respuesta.push_back(ite->second);
+								cout<<"{"<<ite->second->nodes[0]->getdata()<<","<<ite->second->nodes[1]->getdata()<<","<<ite->first <<"}"<<" ";
+							}
+							else if(!ite->second->nodes[0]->buscarpadre()){
+								ite->second->nodes[0]->setpadre(ite->second->nodes[1]->buscarpadre());
+								respuesta.push_back(ite->second);
+								cout<<"{"<<ite->second->nodes[0]->getdata()<<","<<ite->second->nodes[1]->getdata()<<","<<ite->first <<"}"<<" ";
+							}
+							else if(!ite->second->nodes[1]->buscarpadre()){
+								ite->second->nodes[1]->setpadre(ite->second->nodes[0]->buscarpadre());
+								respuesta.push_back(ite->second);
+								cout<<"{"<<ite->second->nodes[0]->getdata()<<","<<ite->second->nodes[1]->getdata()<<","<<ite->first <<"}"<<" ";
+							}
+							aristamap.erase(ite);
+							ite = aristamap.begin();
+						}
           }
           cout<<endl;
+					return respuesta;
         }
 
-				void prim(node* nodo){
+				EdgeSeq prim(node* nodo){// prim con mutimap
+					EdgeSeq respuesta;
 					cout<<"Prim"<<endl;
 					if(dir==1){
 						cout<<"grafo dirigido, no hay prim"<<endl;
-						return;
+						return respuesta;
 					}
 					multimap<E, edge*> aristmap;
 					map<node*,bool> map;
@@ -350,10 +326,10 @@ class Graph {
 						aristmap.insert(pair<E,edge*> (item->getdata(), item));
 					}
 					map[nodo]=true;
-					//cout<<nodo->getdata()<<" ";
 					auto ite=aristmap.begin();
 					while(ite!=aristmap.end()){
 						if(ite->second->nodes[0]!=nodo && map[ite->second->nodes[0]]==false){
+							respuesta.push_back(ite->second);
 							cout<<"{"<<ite->second->nodes[1]->getdata()<<","<<ite->second->nodes[0]->getdata()<<","<<ite->first <<"}"<<" ";
 							nodo=ite->second->nodes[0];
 							map[nodo]=true;
@@ -364,6 +340,7 @@ class Graph {
 							ite=aristmap.begin();
 						}
 						else if(ite->second->nodes[1]!=nodo && map[ite->second->nodes[1]]==false){
+							respuesta.push_back(ite->second);
 							cout<<"{"<<ite->second->nodes[0]->getdata()<<","<<ite->second->nodes[1]->getdata()<<","<<ite->first <<"}"<<" ";
 							nodo=ite->second->nodes[1];
 							map[nodo]=true;
@@ -379,9 +356,10 @@ class Graph {
 						}
 					}
 					cout<<endl;
+					return respuesta;
 				}
 
-				void insertarnodo(int nombre,float x, float y){
+				void insertarnodo(int nombre,float x, float y){//Inserta un Nodo si existe
 				 node* temp=buscarnodo(nombre);
 				 if(!temp){
 					 node* nodo=new node(nombre,x,y);
@@ -393,7 +371,7 @@ class Graph {
 				 }
 				};
 
-				void InsertArista(N nodo1, N nodo2,E peso){
+				void InsertArista(N nodo1, N nodo2,E peso){ // Inserta la arista si no existe, si es no dirigido la misma arista se inserta en ambas listas de adyacencias
 					node* temp= buscarnodo(nodo1);
 					node* temp2= buscarnodo(nodo2);
 					if(!temp || !temp2){
@@ -433,7 +411,7 @@ class Graph {
 
 				};
 
-				void removerNodo(N x){
+				void removerNodo(N x){ // Remueve un nodo si existe
 					for(int i=0;i<nodes.size();i++){
 						if(nodes[i]->getdata()==x){
 							ei=nodes[i]->edges.begin();
@@ -528,7 +506,7 @@ class Graph {
 					else
 						return temp->gradollegada();
 				}
-				void comprobar_conectividad(node* nodo){
+				void comprobar_conectividad(node* nodo){//Comprueba la conectividad del grafo llamando a las diferentes funciones dependiendo si es dirigido y no dirigido
 					if(dir==0){
 						dfs(nodo);
 						if(conexo)
@@ -539,11 +517,11 @@ class Graph {
 						fuertemente(nodo);
 					}
 				}
-				bool isconexo(){
+				bool isconexo(){//Devuelve booleano si es conexo
 					return conexo;
 				}
 
-				void print() {
+				void print() {// Print del grafo
 					for (int i = 0; i < nodes.size(); i++) {
 						cout<<nodes[i]->getdata()<<" -> ";
 						for ( auto& item : nodes[i]->edges )
@@ -557,7 +535,7 @@ class Graph {
 					}
 				};
 
-				node* buscarnodo(N data){
+				node* buscarnodo(N data){//  buscar un nodo a partir de la data
 					node* temp=nullptr;
 					for(int i=0; i<nodes.size(); i++){
 						if(data==nodes[i]->getdata()){
@@ -568,7 +546,7 @@ class Graph {
 					return temp;
 				}
 
-				edge* buscararista(N x, N y){
+				edge* buscararista(N x, N y){//busca  una arista a partir de 2 nodos, comprueba si es dirigido o no
 					node* temp=buscarnodo(x);
 					edge* ptrarista=nullptr;
 					for (auto& item: temp->edges){
@@ -584,9 +562,29 @@ class Graph {
 					return ptrarista;
 				}
 
-				float getDensity()
+			  void tiponodos(){ //Output de tipos de nodos
+					if(dir==0){
+						for(int i=0; nodes.size();i++){
+							cout<<nodes[i]->getdata()<<" normal"<<endl;
+						}
+					}
+					else{
+						for(int i=0; nodes.size();i++){
+							cout<<nodes[i]->getdata()<<" ";
+							if(nodes[i]->gradosalida()==0){
+								cout<<"hundido"<<" ";
+							}
+							if(nodes[i]->gradollegada()==0){
+								cout<<"fuente"<<" ";
+							}
+							cout<<endl;
+						}
+					}
+				}
+
+				float getDensity(float cotadensidad)// devuelve densidad
         {
-          float cotadensidad = 0.6;
+          //float cotadensidad = 0.6;
           float densidad;
           if(dir==0){
             densidad = (2*(float)aristas)/(((float)nodos)*((float)nodos-1));
@@ -602,10 +600,11 @@ class Graph {
             else
               cout << "El grafo dirigido es disperso: ";
             }
+						cout<<endl;
            return densidad;
           }
 
-			  void read_file(string file)
+			  void read_file(string file)// Lee el archivo  y crea el grafo
 			  {
 				ifstream read(file);
                 string lines;

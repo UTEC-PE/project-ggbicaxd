@@ -41,7 +41,10 @@ int main(int argc, char *argv[]) {
       threads[i].join();
     }
 
-
+    cout<<"Bellman Ford"<<endl;
+    mygraph.bellmanFord(0);
+    cout<<"GreedyBFS"<<endl;
+    mygraph.greedybfs(0,1);
     auto floyd=mygraph.floydwarshall();
     floyd->print();
     cout<<"Dijkstra"<<endl;

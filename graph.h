@@ -227,7 +227,97 @@ class Graph {
 					return walks;
 				}
 
+				map<node*,int> bellmanFord(N data){
+				  auto nodo=buscarnodo(data);
+				  map<node*,int> distancias;
+				  //map<node*,node*> predecesor;
+				  EdgeSeq alledges;
+				  for(int i=0; i<nodes.size();i++){
+				    for(auto item:nodes[i]->edges){
+				      alledges.push_back(item);
+				    }
+				    distancias.insert(pair<node*,int> (nodes[i],INT_MAX));
+				    //predecesor.insert(pair<node*,node*> (nodes[i],nullptr));
+				  }
+				  distancias[nodo]=0;
+				  for(int j=0; j<nodes.size()-1;j++){
+				    for(auto item: alledges){
+				      if(distancias[item->nodes[0]]!=INT_MAX && distancias[item->nodes[1]]>distancias[item->nodes[0]]+item->getdata()){
+				        distancias[item->nodes[1]]=distancias[item->nodes[0]]+item->getdata();
+				        //predecesor[item->nodes[1]]=item->nodes[0];
+				      }
+				    }
+				  }
+				  for(auto item:alledges){
+				    if(distancias[item->nodes[0]]!=INT_MAX && distancias[item->nodes[1]]>distancias[item->nodes[0]]+item->getdata()){
+				      cout<<"Ciclo negativo "<<endl;
+				      break;
+				    }
+				  }
 
+				  for(auto item:distancias){
+				    cout<<item.first->getdata()<<" : "<<item.second<<endl;
+				  }
+				  return distancias;
+				}
+
+				EdgeSeq greedybfs(N data, N llegada){
+				  EdgeSeq respuesta;
+				  auto nodo=buscarnodo(data);
+				  cout<<"Greedy BFS"<<endl;
+				  multimap<E, edge*> aristmap;
+				  map<node*,bool> map;
+				  for(int i=0; i<nodes.size();i++){
+				    map.insert(pair<node*, bool> (nodes[i],false));
+				  }
+				  for(auto item: nodo->edges){
+				    aristmap.insert(pair<E,edge*> (item->getdata(), item));
+				  }
+				  map[nodo]=true;
+				  auto ite=aristmap.begin();
+				  while(ite!=aristmap.end()){
+				    if(ite->second->nodes[0]!=nodo && map[ite->second->nodes[0]]==false){
+				      cout<<"{"<<ite->second->nodes[1]->getdata()<<","<<ite->second->nodes[0]->getdata()<<","<<ite->first <<"}"<<" ";
+				      nodo=ite->second->nodes[0];
+				      map[nodo]=true;
+				      respuesta.push_back(ite->second);
+				      if(ite->second->nodes[0]->getdata()==llegada){
+				        cout<<endl;
+				        return respuesta;
+				        break;
+				      }
+				      aristmap.erase(ite);
+				      for(auto& item:nodo->edges){
+				        aristmap.insert(pair<E,edge*> (item->getdata(), item));
+				      }
+
+				      ite=aristmap.begin();
+				    }
+				    else if(ite->second->nodes[1]!=nodo && map[ite->second->nodes[1]]==false){
+				      cout<<"{"<<ite->second->nodes[0]->getdata()<<","<<ite->second->nodes[1]->getdata()<<","<<ite->first <<"}"<<" ";
+				      nodo=ite->second->nodes[1];
+				      map[nodo]=true;
+				      respuesta.push_back(ite->second);
+				      if(ite->second->nodes[1]->getdata()==llegada){
+				        cout<<endl;
+				        return respuesta;
+				        break;
+				      }
+				      aristmap.erase(ite);
+				      for(auto& item:nodo->edges){
+				        aristmap.insert(pair<E,edge*> (item->getdata(), item));
+				      }
+
+				      ite=aristmap.begin();
+				    }
+				    else{
+				      aristmap.erase(ite);
+				      ite=aristmap.begin();
+				    }
+				  }
+				  cout<<endl;
+				  return respuesta;
+				}
 
 				Matris* floydwarshall(){
 					//int matriz1[nodos][nodos];

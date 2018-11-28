@@ -53,6 +53,14 @@ class Node {
           this-> padre=nodo;
         }
         Node<G>* padre;
+
+        double getx(){
+          return x;
+        }
+
+        double gety(){
+          return y;
+        }
     private:
 
         N data;
@@ -62,5 +70,8 @@ class Node {
         double y;
 
 };
+
+
+
 
 #endif

@@ -9,11 +9,15 @@
 #include <sstream>
 #include <map>
 #include <algorithm>
+#include <limits.h>
+#include <math.h>
 #include "queue.h"
 #include "stack.h"
 
 #include "node.h"
 #include "edge.h"
+#include "camino.h"
+#include "Matrix.h"
 
 using namespace std;
 
@@ -29,6 +33,8 @@ class Graph {
         typedef Graph<Tr> self;
         typedef Node<self> node;
         typedef Edge<self> edge;
+				typedef Matrix<self> Matris;
+				typedef Camino<self> camino;
         typedef vector<node*> NodeSeq;
         typedef list<edge*> EdgeSeq;
         typedef typename Tr::N N;
@@ -62,6 +68,205 @@ class Graph {
 						}
 						delete nodes[i];
 					}
+				}
+				double heuristica(node* nodo, node* nodo2){
+						return sqrt(pow((nodo2->getx()-nodo->getx()),2)+pow((nodo2->gety()-nodo->gety()),2));
+				}
+
+				node* minheuristic(map<node*,bool> mapa, map<node*, double> posiblesNodos, map<node*,double> heuristicas){
+					node* indice=nullptr;
+					double min=std::numeric_limits<double>::max();
+					for(auto item: posiblesNodos){
+						if(mapa[item.first]==false && posiblesNodos[item.first]!=std::numeric_limits<double>::max() && posiblesNodos[item.first]+heuristicas[item.first]<=min){
+							min=posiblesNodos[item.first]+heuristicas[item.first];
+							indice=item.first;
+						}
+					}
+					return indice;
+				}
+
+				vector<double> heuristicfalsa(){
+					vector<double> falsas;
+					falsas.push_back(36);
+					falsas.push_back(39);
+					falsas.push_back(31);
+					falsas.push_back(30);
+					falsas.push_back(34);
+					falsas.push_back(32);
+					falsas.push_back(21);
+					falsas.push_back(19);
+					falsas.push_back(0);
+					return falsas;
+				}
+
+				EdgeSeq A_asterisco(N data, N llegada){
+
+					EdgeSeq respuesta;
+					auto nodo=buscarnodo(data);
+					auto final=buscarnodo(llegada);
+					if(!nodo || !final){
+						cout<<"nodos inexistentes"<<endl;
+						throw ;
+					}
+					map<node*, double> heuristicas;
+					//vector<double> falsas=heuristicfalsa();
+					map<node*, double> posiblesNodos;
+					map<node*,node*> predecesor;
+					map<node*,bool> map;
+
+					double Max=std::numeric_limits<double>::max();
+					double heuristic;
+					for(int i=0;i<nodes.size();i++){
+						heuristic=heuristica(nodes[i],final);
+						heuristicas.insert(pair<node*,double> (nodes[i],/*falsas[i]*/heuristic));
+						map.insert(pair<node*,bool> (nodes[i],false));
+						predecesor.insert(pair<node*,node*> (nodes[i],nullptr));
+						posiblesNodos.insert(pair<node*,double> (nodes[i],Max));
+					}
+					predecesor[nodo]=nodo;
+					posiblesNodos[nodo]=heuristicas[nodo];
+
+					do{
+						nodo=minheuristic(map,posiblesNodos,heuristicas);
+						if(!nodo){
+							break;
+						}
+						map[nodo]=true;
+						for(auto item:nodo->edges){
+							if(item->nodes[0]!=nodo && posiblesNodos[nodo]+item->getdata()<posiblesNodos[item->nodes[0]]){
+								posiblesNodos[item->nodes[0]]=posiblesNodos[nodo]+item->getdata();
+								predecesor[item->nodes[0]]=nodo;
+								if(item->nodes[0]->getdata()==llegada){
+									nodo=item->nodes[0];
+									break;
+								}
+							}
+							else if(item->nodes[1]!=nodo && posiblesNodos[nodo]+item->getdata()<posiblesNodos[item->nodes[1]]){
+								posiblesNodos[item->nodes[1]]=posiblesNodos[nodo]+item->getdata();
+								predecesor[item->nodes[1]]=nodo;
+								if(item->nodes[1]->getdata()==llegada){
+									nodo=item->nodes[1];
+									break;
+								}
+							}
+						}
+					}
+					while(nodo!=nullptr && nodo->getdata()!=llegada);
+					edge* arista;
+					edge* nuevaarista;
+					if(nodo ){
+						while(predecesor[nodo]!=nodo){
+							arista=buscararista(predecesor[nodo]->getdata(),nodo->getdata());
+							nuevaarista=new edge(predecesor[nodo],nodo,arista->getdata(),1);
+							respuesta.push_front(nuevaarista);
+							nodo=predecesor[nodo];
+						}
+					}
+					else{
+						cout<<"No existe camino de "<<data<<" a "<<llegada<<endl;
+					}
+
+					/*for(auto item: respuesta){
+						cout<<"("<<item->nodes[0]->getdata()<<","<<item->nodes[1]->getdata()<<")"<<" ";
+					}
+					cout<<endl;*/
+					return respuesta;
+				}
+
+				int indiceMin(map<node*,int> caminos, map<node*,bool> map){
+					int indice=-1;
+					int min=INT_MAX;
+					for(int i=0; i<nodes.size();i++){
+						if(map[nodes[i]]==false && caminos[nodes[i]]<=min){
+							min=caminos[nodes[i]];
+							indice=i;
+						}
+					}
+					if(min==INT_MAX){
+						return -1;
+					}
+					return indice;
+				}
+
+				map<node*,camino*> dijkstra(N data){
+					auto nodo=buscarnodo(data);
+					map<node*,camino*> walks;
+					camino* walk;
+					map<node*,int> caminos;
+					map<node*,bool> map;
+					for(int i=0; i<nodes.size();i++){
+						map.insert(pair<node*, bool> (nodes[i],false));
+						caminos.insert(pair<node*,int> (nodes[i],INT_MAX));
+						walk=new camino(nodo,INT_MAX);
+						walks.insert(pair<node*,camino*> (nodes[i],walk));
+					}
+					walks[nodo]->peso=0;
+					caminos[nodo]=0;
+					map[nodo]=true;
+					int minimo=(int)data;
+					do{
+						nodo=nodes[minimo];
+						map[nodo]=true;
+						for(auto item:nodo->edges){
+							if(item->nodes[0]!=nodo && item->getdata()+caminos[nodo]<caminos[item->nodes[0]]){
+								caminos[item->nodes[0]]=item->getdata()+caminos[nodo];
+								walks[item->nodes[0]]->peso=item->getdata()+caminos[nodo];
+								walks[item->nodes[0]]->nodos=walks[nodo]->nodos;
+								walks[item->nodes[0]]->nodos.push_back(item);
+							}
+							else if(item->nodes[1]!=nodo && item->getdata()+caminos[nodo]<caminos[item->nodes[1]]){
+								caminos[item->nodes[1]]=item->getdata()+caminos[nodo];
+								walks[item->nodes[1]]->peso=item->getdata()+caminos[nodo];
+								walks[item->nodes[1]]->nodos=walks[nodo]->nodos;
+								walks[item->nodes[1]]->nodos.push_back(item);
+							}
+						}
+						minimo=indiceMin(caminos,map);
+					}
+					while(minimo!=-1);
+					return walks;
+				}
+
+
+
+				Matris* floydwarshall(){
+					//int matriz1[nodos][nodos];
+					//int matriz2[nodos][nodos];
+					Matris* matrix=new Matris(nodos);
+					for(int i=0;i<nodos;i++){
+						for(int j=0;j<nodos;j++){
+							if(i==j){
+								matrix->matriz1[i][j]=0;
+								matrix->matriz2[i][j]=0;
+							}
+							else{
+								matrix->matriz1[i][j]=INT_MAX;
+								matrix->matriz2[i][j]=j;
+							}
+						}
+					}
+
+					for(int k=0;k<nodes.size();k++){
+						for(auto item:nodes[k]->edges){
+							if(nodes[k]!=item->nodes[0])
+							matrix->matriz1[item->nodes[1]->getdata()][item->nodes[0]->getdata()]=item->getdata();
+							else if(nodes[k]!=item->nodes[1])
+							matrix->matriz1[item->nodes[0]->getdata()][item->nodes[1]->getdata()]=item->getdata();
+						}
+					}
+					for(int x=0;x<nodes.size();x++){
+						for(int y=0;y<nodes.size();y++){
+							if(x!=y){
+								for(int z=0;z<nodes.size();z++){
+									if(x!=z && matrix->matriz1[y][x]!=INT_MAX && matrix->matriz1[x][z]!=INT_MAX && matrix->matriz1[y][x]+matrix->matriz1[x][z]<matrix->matriz1[y][z]){
+										matrix->matriz1[y][z]=matrix->matriz1[y][x]+matrix->matriz1[x][z];
+										matrix->matriz2[y][z]=x;
+									}
+								}
+							}
+						}
+					}
+					return matrix;
 				}
 
 				void fuertemente(node* nodo){//Comprueba la conectividad, se llama desde comprobar_conectividad

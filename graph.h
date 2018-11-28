@@ -165,11 +165,6 @@ class Graph {
 					else{
 						cout<<"No existe camino de "<<data<<" a "<<llegada<<endl;
 					}
-
-					/*for(auto item: respuesta){
-						cout<<"("<<item->nodes[0]->getdata()<<","<<item->nodes[1]->getdata()<<")"<<" ";
-					}
-					cout<<endl;*/
 					return respuesta;
 				}
 
